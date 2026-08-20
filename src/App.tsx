@@ -1,15 +1,18 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import BackgroundFX from "./components/BackgroundFX";
 import { getBackend, Profile, Year } from "./lib/backend";
 import { defaultProgress, Progress, rankFor, RANKS, touchToday } from "./lib/store";
 import { chaptersForYear } from "./data/courses";
+import { hasAI } from "./lib/ai";
 import Auth from "./views/Auth";
 import Onboarding from "./views/Onboarding";
 import Dashboard from "./views/Dashboard";
 import Courses from "./views/Courses";
+import AICourses from "./views/AICourses";
 import Tutor from "./views/Tutor";
 import QuizLab from "./views/QuizLab";
 import Flashcards from "./views/Flashcards";
+import AISettingsModal from "./components/AISettingsModal";
 import {
   IconBolt,
   IconCards,
@@ -18,17 +21,19 @@ import {
   IconGrid,
   IconSpark,
   IconStack,
+  IconWand,
 } from "./components/icons";
 
-type View = "dash" | "courses" | "tutor" | "quiz" | "cards";
+type View = "dash" | "courses" | "ai" | "tutor" | "quiz" | "cards";
 type Payload = Record<string, string>;
 
-const NAV: { id: View; label: string; icon: typeof IconGrid; terminal: string }[] = [
-  { id: "dash", label: "Tableau de bord", icon: IconGrid, terminal: "~/accueil" },
-  { id: "courses", label: "Cours", icon: IconStack, terminal: "~/cours" },
-  { id: "tutor", label: "Tuteur IA", icon: IconSpark, terminal: "~/tuteur" },
-  { id: "quiz", label: "Labo quiz", icon: IconFlask, terminal: "~/labo" },
-  { id: "cards", label: "Flashcards", icon: IconCards, terminal: "~/cartes" },
+const NAV: { id: View; label: string; short: string; icon: typeof IconGrid; terminal: string }[] = [
+  { id: "dash", label: "Tableau de bord", short: "accueil", icon: IconGrid, terminal: "~/accueil" },
+  { id: "courses", label: "Cours", short: "cours", icon: IconStack, terminal: "~/cours" },
+  { id: "ai", label: "Cours IA", short: "ia", icon: IconWand, terminal: "~/studio-ia" },
+  { id: "tutor", label: "Tuteur IA", short: "tuteur", icon: IconSpark, terminal: "~/tuteur" },
+  { id: "quiz", label: "Labo quiz", short: "labo", icon: IconFlask, terminal: "~/labo" },
+  { id: "cards", label: "Flashcards", short: "cartes", icon: IconCards, terminal: "~/cartes" },
 ];
 
 function BootScreen({ label }: { label: string }) {
@@ -65,8 +70,11 @@ export default function App() {
   const [view, setView] = useState<View>("dash");
   const [payload, setPayload] = useState<Payload>({});
   const [profileMenu, setProfileMenu] = useState(false);
+  const [aiSettingsOpen, setAiSettingsOpen] = useState(false);
+  const [aiVersion, setAiVersion] = useState(0);
   const saveTimer = useRef<number>(0);
   const loadedFor = useRef<string | null>(null);
+  const aiOn = useMemo(() => hasAI(), [aiVersion]);
 
   /* ---------- session + chargement de la progression ---------- */
   useEffect(() => {
@@ -298,6 +306,18 @@ export default function App() {
             </div>
           </div>
 
+          <button
+            onClick={() => setAiSettingsOpen(true)}
+            title="Configurer l'IA réelle"
+            className={`hidden sm:flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 font-mono text-[11px] transition-colors ${
+              aiOn ? "border-mint/45 text-mint bg-mint/[0.06] hover:bg-mint/10" : "border-line text-dim hover:text-mist hover:border-line2"
+            }`}
+          >
+            <IconWand className="w-3.5 h-3.5" />
+            IA
+            <span className={`w-1.5 h-1.5 rounded-full ${aiOn ? "bg-mint pulse-dot" : "bg-dim"}`} />
+          </button>
+
           <button onClick={() => nav("dash")} className="hidden md:block">
             <YearChip year={year} color={yearColor} />
           </button>
@@ -361,7 +381,24 @@ export default function App() {
                 onComplete={completeChapter}
               />
             )}
-            {view === "tutor" && <Tutor nav={nav} onAsk={tutorAsk} year={year} />}
+            {view === "ai" && (
+              <AICourses
+                user={profile}
+                year={year}
+                nav={nav}
+                aiVersion={aiVersion}
+                onOpenSettings={() => setAiSettingsOpen(true)}
+              />
+            )}
+            {view === "tutor" && (
+              <Tutor
+                nav={nav}
+                onAsk={tutorAsk}
+                year={year}
+                aiVersion={aiVersion}
+                onOpenSettings={() => setAiSettingsOpen(true)}
+              />
+            )}
             {view === "quiz" && <QuizLab progress={progress} nav={nav} year={year} onResult={recordQuiz} />}
             {view === "cards" && (
               <Flashcards known={progress.known} onToggle={toggleKnown} year={year} />
@@ -394,12 +431,19 @@ export default function App() {
                 className={`flex flex-col items-center gap-1 py-2.5 transition-colors ${isActive ? "text-mint" : "text-dim"}`}
               >
                 <Icon className="w-5 h-5" />
-                <span className="text-[9.5px] font-mono">{item.label.split(" ")[0].toLowerCase()}</span>
+                <span className="text-[9.5px] font-mono">{item.short}</span>
               </button>
             );
           })}
         </div>
       </nav>
+
+      {/* réglages IA réelle */}
+      <AISettingsModal
+        open={aiSettingsOpen}
+        onClose={() => setAiSettingsOpen(false)}
+        onChanged={() => setAiVersion((v) => v + 1)}
+      />
     </div>
   );
 }

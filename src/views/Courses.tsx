@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import {
   chaptersForYear,
   findChapter,
@@ -13,13 +13,18 @@ import { Reveal, Scramble } from "../components/fx";
 import {
   IconArrow,
   IconBook,
+  IconCalc,
   IconCheck,
   IconClock,
   IconCube,
+  IconGlobe,
   IconNet,
+  IconPen,
+  IconScale,
   IconServer,
   IconShield,
   IconTerminal,
+  IconWand,
 } from "../components/icons";
 import { Nav } from "./Dashboard";
 
@@ -29,7 +34,13 @@ const MODULE_ICONS = {
   terminal: IconTerminal,
   cube: IconCube,
   shield: IconShield,
+  calc: IconCalc,
+  scale: IconScale,
+  globe: IconGlobe,
+  pen: IconPen,
 };
+
+const TECH_IDS = new Set(["net", "win", "lnx", "vir", "sec"]);
 
 function YearBadge({ id }: { id: string }) {
   const y = yearOf(id);
@@ -389,12 +400,29 @@ export default function Courses({
       </header>
 
       <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-5">
+        <div className="sm:col-span-2 xl:col-span-3 flex items-center gap-3">
+          <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-cy">
+            modules techniques — spécialité SISR
+          </span>
+          <span className="flex-1 h-px bg-line" />
+        </div>
         {modules.map((m, i) => {
           const Icon = MODULE_ICONS[m.icon];
           const done = m.chapters.filter((c) => progress.done.includes(c.id)).length;
           const pct = Math.round((done / m.chapters.length) * 100);
+          const isGen = !TECH_IDS.has(m.id);
+          const prevGen = i > 0 && !TECH_IDS.has(modules[i - 1].id);
           return (
-            <Reveal key={m.id} delay={i * 80}>
+            <Fragment key={m.id}>
+              {isGen && !prevGen && (
+                <div className="sm:col-span-2 xl:col-span-3 flex items-center gap-3 pt-2">
+                  <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-vio">
+                    matières générales — tronc commun
+                  </span>
+                  <span className="flex-1 h-px bg-line" />
+                </div>
+              )}
+              <Reveal delay={i * 80}>
               <button
                 onClick={() => {
                   setModuleId(m.id);
@@ -441,11 +469,32 @@ export default function Courses({
                   <IconArrow className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1.5" />
                 </div>
               </button>
-            </Reveal>
+              </Reveal>
+            </Fragment>
           );
         })}
 
         <Reveal delay={modules.length * 80}>
+          <button
+            onClick={() => nav("ai")}
+            className="w-full h-full text-left rounded-lg p-6 flex flex-col border border-dashed border-line2 hover:border-cy/60 hover:bg-cy/[0.04] transition-colors group"
+          >
+            <span className="w-11 h-11 rounded-lg border border-cy/40 text-cy bg-cy/10 flex items-center justify-center">
+              <IconWand className="w-5 h-5" />
+            </span>
+            <h3 className="font-display text-xl font-bold mt-4">Sujet pas compris ?</h3>
+            <p className="text-mist text-sm mt-1.5 flex-1 leading-relaxed">
+              Le studio IA rédige un cours sur mesure sur n'importe quel point du programme — VLAN, probabilités,
+              RGPD…
+            </p>
+            <div className="mt-4 flex items-center gap-2 font-mono text-[12px] text-cy">
+              générer un cours
+              <IconArrow className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1.5" />
+            </div>
+          </button>
+        </Reveal>
+
+        <Reveal delay={modules.length * 80 + 80}>
           <button
             onClick={() => nav("tutor")}
             className="w-full h-full text-left rounded-lg p-6 flex flex-col border border-dashed border-line2 hover:border-mint/60 hover:bg-mint/[0.04] transition-colors group"

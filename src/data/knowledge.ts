@@ -172,6 +172,51 @@ const KB: Entry[] = [
       "WSUS centralise les mises à jour Microsoft : le serveur les télécharge, vous les approuvez, les clients installent selon une GPO.\n\nBonnes pratiques : anneaux test → production, approbation après validation, reporting des échecs. Un patch critique (CVE exploitée) se déploie sous 48 h, le reste suit le cycle mensuel.",
     related: [{ moduleId: "win", chapterId: "win-maint", label: "Cours : WSUS et supervision" }],
   },
+  {
+    patterns: [/binaire/i, /hexad[eé]cimal/i, /conversion/i, /base 2/i, /base 16/i, /octet/i],
+    answer:
+      "Les conversions de bases sont le calcul quotidien de l'admin réseau.\n\n• Décimal → binaire : divisions successives par 2, restes lus de bas en haut (13 = 1101).\n• Binaire → décimal : somme des puissances de 2 des bits à 1.\n• Hexadécimal : 1 chiffre = 4 bits (0x2C = 0010 1100 = 44).\n• Puissances de 2 d'un octet : 128, 64, 32, 16, 8, 4, 2, 1.\n\nRéflexe : les masques de sous-réseau (255, 240, 224…) sont des sommes de puissances de 2.",
+    related: [{ moduleId: "mth", chapterId: "mth-bases", label: "Cours : binaire et hexadécimal" }],
+  },
+  {
+    patterns: [/logique/i, /table de v[eé]rit[eé]/i, /connecteur/i, /\bet\b.*\bou\b/i, /xor/i],
+    answer:
+      "Les connecteurs logiques combinent des propositions vraies (1) ou fausses (0).\n\n• ET (∧) : 1 seulement si tout est à 1 → c'est « IP ET masque ».\n• OU (∨) : 1 si au moins une entrée est à 1.\n• NON (¬) : inverse. XOR : 1 si les entrées diffèrent.\n• Implication A⇒B fausse uniquement quand A=1 et B=0.\n\nAu processeur comme au pare-feu, tout n'est que ET/OU appliqués bit à bit.",
+    related: [{ moduleId: "mth", chapterId: "mth-logique", label: "Cours : logique et tables de vérité" }],
+  },
+  {
+    patterns: [/rgpd/i, /donn[eé]es personnelles/i, /cnil/i, /droit [àa] l'oubli/i],
+    answer:
+      "Le RGPD encadre tout traitement de données personnelles (nom, IP, cookie…).\n\n• Principes : licéité, finalité, minimisation, sécurité, conservation limitée.\n• Droits : accès, rectification, effacement, portabilité.\n• Violation de données : notification CNIL sous 72 h.\n• Sanctions : jusqu'à 20 M€ ou 4 % du CA mondial.\n\nCôté SISR : chiffrement, MFA et journalisation sont vos mesures de conformité.",
+    related: [{ moduleId: "cej", chapterId: "cej-rgpd", label: "Cours : RGPD et données personnelles" }],
+  },
+  {
+    patterns: [/godfrain/i, /cybercriminalit[eé]/i, /acc[eè]s frauduleux/i, /stad/i],
+    answer:
+      "La loi Godfrain (1988) punit les atteintes aux systèmes de traitement automatisé de données (STAD) :\n\n• Accès ou maintien frauduleux (même « pour voir »).\n• Entrave au fonctionnement (attaque en déni de service).\n• Altération ou suppression de données (ransomware).\n\nLes peines vont jusqu'à 5-7 ans. Un pentest sans convention écrite tombe sous le coup de la loi : toujours un cadre écrit.",
+    related: [{ moduleId: "cej", chapterId: "cej-cyber", label: "Cours : droit du numérique" }],
+  },
+  {
+    patterns: [/entretien/i, /embauche/i, /recrutement/i, /lettre de motivation/i, /\bcv\b/i],
+    answer:
+      "Pour candidater en IT :\n\n• CV : une page, compétences techniques réelles (TP, maquettes), projets avec chiffres.\n• Lettre : structure Vous (l'entreprise) — Moi (mes compétences) — Nous (ensemble).\n• Entretien : méthode STAR pour les questions comportementales (Situation, Task, Action, Result).\n• Prépare 3 histoires issues de tes TP : panne résolue, projet déployé, utilisateur formé.",
+    related: [
+      { moduleId: "fra", chapterId: "fra-cv", label: "Cours : CV et lettre de motivation" },
+      { moduleId: "eng", chapterId: "eng-job", label: "Cours : entretien en anglais" },
+    ],
+  },
+  {
+    patterns: [/synth[eè]se/i, /documents?/i, /culture g[eé]n[eé]rale/i, /\be1\b/i],
+    answer:
+      "La synthèse de documents (épreuve E1) en 4 étapes :\n\n1. Lecture active : surligner idées clés et thèses de chaque texte.\n2. Tableau de confrontation : une ligne par idée, une colonne par document.\n3. Plan thématique en 2-3 parties qui CROISE les documents (pas de résumé texte par texte !).\n4. Rédaction objective, sans « je », citations courtes entre guillemets, longueur respectée (± 10 %).",
+    related: [{ moduleId: "fra", chapterId: "fra-synthese", label: "Cours : la synthèse de documents" }],
+  },
+  {
+    patterns: [/suites?/i, /arithm[eé]tique/i, /g[eé]om[eé]trique/i, /raison/i],
+    answer:
+      "Deux familles de suites au programme :\n\n• Arithmétique : on ADDITIONNE la raison r → u(n) = u0 + n×r.\n• Géométrique : on MULTIPLIE par la raison q → u(n) = u0 × qⁿ.\n\nPour reconnaître : calcule u(n+1) − u(n) (constant → arithmétique) ou u(n+1)/u(n) (constant → géométrique).\n\nApplication IT : croissance de stockage (arithmétique), trafic qui double (géométrique).",
+    related: [{ moduleId: "mth", chapterId: "mth-suites", label: "Cours : suites arithmétiques et géométriques" }],
+  },
 ];
 
 const GREETING: TutorReply = {
@@ -243,6 +288,7 @@ export type Flashcard = {
 export const CARD_YEAR: Record<string, 1 | 2> = {
   f1: 1, f2: 1, f3: 1, f4: 2, f5: 1, f6: 2, f7: 2, f8: 2,
   f9: 1, f10: 1, f11: 2, f12: 2, f13: 1, f14: 1, f15: 2, f16: 1, f17: 2, f18: 2,
+  f19: 1, f20: 1, f21: 2, f22: 1, f23: 2, f24: 2,
 };
 
 export const cardsForYear = (year: 1 | 2) =>

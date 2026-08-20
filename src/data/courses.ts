@@ -18,7 +18,7 @@ export type CourseModule = {
   code: string;
   title: string;
   tagline: string;
-  icon: "net" | "server" | "terminal" | "cube" | "shield";
+  icon: "net" | "server" | "terminal" | "cube" | "shield" | "calc" | "scale" | "globe" | "pen";
   color: string;
   chapters: Chapter[];
 };
@@ -601,6 +601,549 @@ export const MODULES: CourseModule[] = [
       },
     ],
   },
+  /* ============================== MATHS ============================== */
+  {
+    id: "mth",
+    code: "MTH-01",
+    title: "Mathématiques",
+    tagline: "Binaire, logique, suites, fonctions et probabilités appliquées à l'informatique.",
+    icon: "calc",
+    color: "#F4849B",
+    chapters: [
+      {
+        id: "mth-bases",
+        title: "Bases de numération : binaire et hexadécimal",
+        minutes: 12,
+        blocks: [
+          {
+            t: "p",
+            text: "Un ordinateur ne connaît que deux états : 0 et 1 (le bit). 8 bits forment un octet, capable de représenter 256 valeurs (0 à 255). Pour communiquer avec les machines, un admin doit savoir convertir entre décimal, binaire et hexadécimal — c'est la base du calcul d'adresses IP.",
+          },
+          {
+            t: "list",
+            items: [
+              "Décimal → binaire : divisions successives par 2, on lit les restes de bas en haut (ex. 13 = 1101).",
+              "Binaire → décimal : somme des puissances de 2 des bits à 1 (1101 = 8+4+0+1 = 13).",
+              "Hexadécimal : base 16 (chiffres 0-9 puis A-F). Chaque chiffre hexa = 4 bits (ex. 2C = 0010 1100 = 44).",
+              "Puissances de 2 à connaître : 1, 2, 4, 8, 16, 32, 64, 128 (un octet).",
+            ],
+          },
+          {
+            t: "code",
+            lang: "conversions",
+            code: "44      = 32 + 8 + 4      = 101100 en binaire\n101100  = 1011 | 0100      = B | 4      = 0x2C\n255     = 11111111         = 0xFF   (masque /32… non : octet plein)\n192     = 128 + 64         = 11000000 = 0xC0  (début des masques classiques)",
+          },
+          {
+            t: "tip",
+            text: "L'hexadécimal n'est pas un luxe : adresses MAC (AA:3F:…), codes couleur, affichage mémoire… tout est en hexa. Savoir convertir 0x2C en binaire « de tête » (2 → 0010, C → 1100) est un réflexe qui fait gagner un temps fou en TP.",
+          },
+        ],
+      },
+      {
+        id: "mth-logique",
+        title: "Logique, connecteurs et tables de vérité",
+        minutes: 10,
+        blocks: [
+          {
+            t: "p",
+            text: "Une proposition est vraie (1) ou fausse (0). Les connecteurs logiques combinent les propositions — exactement ce que font les processeurs, les masques de sous-réseau et les règles de pare-feu.",
+          },
+          {
+            t: "list",
+            items: [
+              "ET (∧) : vrai seulement si les deux sont vraies (un masque appliqué à une IP).",
+              "OU (∨) : vrai si au moins une est vraie (règle « accepter si LAN ou VPN »).",
+              "NON (¬) : inverse la valeur.",
+              "OU exclusif (XOR) : vrai si exactement une des deux est vraie.",
+              "Implication (A ⇒ B) : fausse uniquement quand A est vraie et B fausse.",
+            ],
+          },
+          {
+            t: "code",
+            lang: "table de vérité",
+            code: "A  B │ A ET B │ A OU B │ A XOR B │ NON A\n0  0 │   0    │   0    │    0    │  1\n0  1 │   0    │   1    │    1    │  1\n1  0 │   0    │   1    │    1    │  0\n1  1 │   1    │   1    │    0    │  0",
+          },
+          {
+            t: "tip",
+            text: "Lien direct avec le réseau : « IP ET masque » donne l'adresse réseau — c'est littéralement un ET logique bit à bit. Le jour où ça fait tilt, le subnetting devient mécanique.",
+          },
+        ],
+      },
+      {
+        id: "mth-suites",
+        title: "Suites arithmétiques et géométriques",
+        minutes: 12,
+        blocks: [
+          {
+            t: "p",
+            text: "Une suite modélise une évolution : capacité disque qui augmente chaque mois, trafic qui double chaque année, coût amorti d'un serveur. Deux familles dominent au BTS : arithmétique (on ajoute) et géométrique (on multiplie).",
+          },
+          {
+            t: "list",
+            items: [
+              "Arithmétique de raison r : u(n) = u0 + n×r. Somme des n premiers termes : n×(premier + dernier)/2.",
+              "Géométrique de raison q : u(n) = u0 × qⁿ. Somme : u0 × (1 − qⁿ)/(1 − q).",
+              "Reconnaître le type : différences constantes → arithmétique ; rapports constants → géométrique.",
+              "Limite : géométrique avec |q| < 1 converge vers 0 (décroissance, taux de panne…).",
+            ],
+          },
+          {
+            t: "code",
+            lang: "exemple",
+            code: "Un NAS contient 4 To et on ajoute 2 To par an (arithmétique, r = 2) :\n  capacité année n : C(n) = 4 + 2n   → 14 To en année 5.\n\nLe trafic web double chaque année (géométrique, q = 2) :\n  T(n) = 500 × 2ⁿ Go   → 16 000 Go en année 5.",
+          },
+          {
+            t: "tip",
+            text: "Dans les exercices BTS, la question 1 demande presque toujours « montrer que la suite est arithmétique ou géométrique » : calculez u(n+1) − u(n) ou u(n+1)/u(n) et concluez avant d'appliquer les formules.",
+          },
+        ],
+      },
+      {
+        id: "mth-fonctions",
+        title: "Étude de fonctions et dérivées",
+        minutes: 14,
+        blocks: [
+          {
+            t: "p",
+            text: "Une fonction associe à chaque valeur d'entrée une sortie : coût en fonction du nombre de serveurs, temps de réponse en fonction de la charge. L'étude de fonction (domaine, dérivée, tableau de variations, limites) permet de trouver optimums et asymptotes — les « limites physiques » d'un système.",
+          },
+          {
+            t: "list",
+            items: [
+              "Domaine de définition : valeurs de x pour lesquelles f(x) existe (attention aux divisions par 0).",
+              "Dérivée f′(x) : mesure la vitesse de variation. f′ > 0 → f croît ; f′ < 0 → f décroît.",
+              "Extremum local : f′ s'annule en changeant de signe.",
+              "Asymptote horizontale : limite finie de f en ±∞ (ex. saturation d'un lien).",
+            ],
+          },
+          {
+            t: "code",
+            lang: "méthode",
+            code: "f(x) = x³ − 3x + 1\n1. Domaine : ℝ\n2. f′(x) = 3x² − 3 = 3(x−1)(x+1)\n3. f′ s'annule en −1 et 1 :\n     x :  −∞   −1    1   +∞\n     f′ :     +  0  −  0  +\n     f  :  ↗ max ↘ min ↗\n4. Maximum local f(−1) = 3, minimum local f(1) = −1",
+          },
+          {
+            t: "tip",
+            text: "Le tableau de variations est la colonne vertébrale de l'étude : présentez-le proprement, il rapporte des points même si les calculs de limites sont approximatifs.",
+          },
+        ],
+      },
+      {
+        id: "mth-probas",
+        title: "Probabilités et statistiques",
+        minutes: 13,
+        blocks: [
+          {
+            t: "p",
+            text: "Fiabilité d'un disque, taux d'erreurs sur un lien, détection d'intrusions : derrière tout indicateur de supervision se cachent des probabilités. Au BTS : probabilités conditionnelles, théorème des probabilités totales, et statistiques descriptives (moyenne, écart-type).",
+          },
+          {
+            t: "list",
+            items: [
+              "P(A∩B) = P(A) × P(B|A) : probabilité de l'intersection.",
+              "Probabilités totales : P(B) = Σ P(Aᵢ) × P(B|Aᵢ) sur une partition (arbre pondéré).",
+              "Moyenne x̄ = Σ nᵢxᵢ / N ; médiane : valeur qui partage la série en deux.",
+              "Écart-type σ : mesure la dispersion. Un petit σ = système stable et prévisible.",
+            ],
+          },
+          {
+            t: "code",
+            lang: "arbre classique",
+            code: "Un parc : 60 % de disques SSD (panne annuelle 2 %), 40 % de HDD (panne 8 %).\nProbabilité qu'un disque choisi au hasard tombe en panne :\n  P(Panne) = 0,60 × 0,02 + 0,40 × 0,08\n           = 0,012 + 0,032 = 0,044 → 4,4 %\nUn disque est en panne : proba que ce soit un HDD ?\n  P(HDD|Panne) = 0,032 / 0,044 ≈ 0,727 → 72,7 %",
+          },
+          {
+            t: "tip",
+            text: "Faites toujours l'arbre pondéré avant de calculer : il structure le raisonnement, et la formule de Bayes (dernière question) n'est plus qu'une division.",
+          },
+        ],
+      },
+    ],
+  },
+  /* ============================== CEJ ============================== */
+  {
+    id: "cej",
+    code: "CEJ-01",
+    title: "Économie, droit & management",
+    tagline: "CEJM : entreprises, contrats, RGPD et droit du numérique — le cadre légal du métier.",
+    icon: "scale",
+    color: "#7EB3F7",
+    chapters: [
+      {
+        id: "cej-entreprise",
+        title: "L'entreprise et ses formes juridiques",
+        minutes: 11,
+        blocks: [
+          {
+            t: "p",
+            text: "L'entreprise combine travail, capital et organisation pour produire des biens ou services. Son statut juridique conditionne la responsabilité des dirigeants, le capital minimum et la fiscalité — des notions qui tombent à l'écrit CEJM et reviennent en E6 quand on justifie un choix de prestataire.",
+          },
+          {
+            t: "list",
+            items: [
+              "Entreprise individuelle / micro-entreprise : simplicité, mais patrimoine personnel exposé (sauf choix EIRL/EURL).",
+              "SARL : 2 à 100 associés, responsabilité limitée aux apports, gérant.",
+              "SAS / SASU : grande liberté statutaire, président, prisée des startups IT.",
+              "SA : capital minimum 37 000 €, conseil d'administration, pour les grandes structures.",
+              "Critères de choix : responsabilité, nombre d'associés, besoin de financement, image.",
+            ],
+          },
+          {
+            t: "p",
+            text: "Côté organisation, distingue PME (moins de 250 salariés), ETI et grandes entreprises. Une ESN (Entreprise de Services du Numérique) comme celle de ton stage est souvent une SAS ou SARL du secteur tertiaire.",
+          },
+          {
+            t: "tip",
+            text: "En CEJM, cite toujours l'exemple concret de ton entreprise d'accueil (statut, effectif, marché) : les correcteurs valorisent l'ancrage réel plutôt que la récitation du cours.",
+          },
+        ],
+      },
+      {
+        id: "cej-contrats",
+        title: "Le contrat : formation et responsabilité",
+        minutes: 11,
+        blocks: [
+          {
+            t: "p",
+            text: "Un contrat est un accord de volontés créant des obligations. En informatique, tout est contrat : licence logicielle, contrat de maintenance, SLA d'hébergement, CGV. Sa validité exige des conditions précises, et son inexécution engage la responsabilité.",
+          },
+          {
+            t: "list",
+            items: [
+              "Conditions de validité : consentement libre et éclairé, capacité juridique, contenu licite et certain.",
+              "Vices du consentement : erreur, dol (tromperie), violence → nullité possible.",
+              "Responsabilité contractuelle : inexécution ou mauvaise exécution (mise en demeure, dommages-intérêts).",
+              "Responsabilité civile délictuelle : dommage causé hors contrat (faute, lien de causalité, préjudice).",
+              "Obligation de moyens (faire de son mieux) vs obligation de résultat (le résultat est dû).",
+            ],
+          },
+          {
+            t: "p",
+            text: "Exemple typique : un hébergeur avec SLA « disponibilité 99,9 % » a une obligation de résultat sur ce chiffre ; une panne de 8 h sans clause de force majeure ouvre droit à indemnisation.",
+          },
+          {
+            t: "tip",
+            text: "Réflexe d'examen : qualifier (contrat ou délit ?), vérifier la validité, puis identifier le type d'obligation et les sanctions. Ce plan en trois temps couvre la majorité des cas pratiques.",
+          },
+        ],
+      },
+      {
+        id: "cej-rgpd",
+        title: "RGPD et données personnelles",
+        minutes: 12,
+        blocks: [
+          {
+            t: "p",
+            text: "Le RGPD (règlement européen 2016/679, applicable depuis 2018) encadre tout traitement de données personnelles — toute information identifiant directement ou indirectement une personne (nom, IP, cookie, géolocalisation). En SISR, tu es en première ligne : un serveur mal sécurisé peut constituer une violation du règlement.",
+          },
+          {
+            t: "list",
+            items: [
+              "Principes : licéité, finalité déterminée, minimisation, exactitude, conservation limitée, sécurité.",
+              "Droits des personnes : accès, rectification, effacement (« droit à l'oubli »), portabilité, opposition.",
+              "Acteurs : responsable de traitement, sous-traitant, DPO (délégué à la protection des données), CNIL.",
+              "Violation de données : notification à la CNIL sous 72 h, et aux personnes si risque élevé.",
+              "Sanctions : jusqu'à 20 M€ ou 4 % du chiffre d'affaires mondial.",
+            ],
+          },
+          {
+            t: "code",
+            lang: "procédure violation",
+            code: "1. Contenir : isoler la machine compromise, couper l'accès.\n2. Évaluer : quelles données ? combien de personnes ? risque ?\n3. Notifier la CNIL (72 h max) via le DPO.\n4. Informer les personnes concernées si risque élevé.\n5. Documenter : registre des violations, mesures correctives.",
+          },
+          {
+            t: "tip",
+            text: "Lien direct SISR : chiffrement des sauvegardes, journalisation des accès, MFA et cloisonnement réseau sont vos meilleurs arguments RGPD. Au jury E6, reliez chaque mesure technique à un principe du règlement.",
+          },
+        ],
+      },
+      {
+        id: "cej-cyber",
+        title: "Droit du numérique et cybercriminalité",
+        minutes: 12,
+        blocks: [
+          {
+            t: "p",
+            text: "Le droit français sanctionne spécifiquement les atteintes aux systèmes informatiques. Un admin qui « dépanne » sans autorisation peut tomber sous le coup de la loi — connaître ces textes protège autant l'entreprise que toi.",
+          },
+          {
+            t: "list",
+            items: [
+              "Loi Godfrain (1988) : accès et maintien frauduleux dans un STAD, entrave au fonctionnement, altération de données — jusqu'à 5-7 ans d'emprisonnement.",
+              "Fraude informatique (art. 313-1) : manipulation de données pour un gain (faux virements, détournements).",
+              "LCEN (2004) : responsabilité des hébergeurs, obligation de conservation des données de connexion.",
+              "Code de la propriété intellectuelle : contrefaçon de logiciels, usage de licences non conformes.",
+              "Obligation de sécurisation : les opérateurs doivent protéger leurs systèmes (NIS 2 pour les secteurs essentiels).",
+            ],
+          },
+          {
+            t: "p",
+            text: "Côté preuve : la journalisation (logs horodatés, intègres) est indispensable pour déposer plainte et identifier l'auteur. Un test d'intrusion sans convention écrite = accès frauduleux, même avec de bonnes intentions.",
+          },
+          {
+            t: "tip",
+            text: "À retenir pour l'écrit : le triptyque « accès frauduleux / entrave / altération » de la loi Godfrain tombe régulièrement. Associez chaque infraction à un exemple technique (scan non autorisé, ransomware, défiguration de site).",
+          },
+        ],
+      },
+    ],
+  },
+  /* ============================== ANGLAIS ============================== */
+  {
+    id: "eng",
+    code: "ENG-01",
+    title: "Anglais professionnel",
+    tagline: "Vocabulaire IT, e-mails, entretiens et présentations — l'anglais du métier.",
+    icon: "globe",
+    color: "#F0A868",
+    chapters: [
+      {
+        id: "eng-it",
+        title: "IT English : le vocabulaire qui sauve",
+        minutes: 10,
+        blocks: [
+          {
+            t: "p",
+            text: "La documentation technique est en anglais : manuels Cisco, erreurs Windows Event Viewer, forums Stack Overflow. Maîtriser le vocabulaire de base permet de dépanner plus vite — et l'épreuve orale d'anglais s'appuie souvent sur un document IT.",
+          },
+          {
+            t: "list",
+            items: [
+              "Réseau : throughput (débit), bandwidth (bande passante), downtime (indisponibilité), outage (panne), latency, bandwidth cap.",
+              "Incidents : to troubleshoot (dépanner), to escalate (escalader), workaround (solution de contournement), rollback (retour arrière).",
+              "Matériel : storage, blade server, rack, power supply, spare part (pièce de rechange).",
+              "Verbes clés : to deploy, to configure, to back up / to restore, to monitor, to patch.",
+            ],
+          },
+          {
+            t: "code",
+            lang: "phrases de ticket",
+            code: "User report  : \"The shared drive is unreachable since this morning.\"\nDiagnostic   : \"I'm checking the link status and the DNS resolution.\"\nAction       : \"I'll reboot the service and monitor it for an hour.\"\nFollow-up    : \"Could you confirm whether the issue still occurs?\"\nClosure      : \"The incident is resolved. A fix will be deployed on Friday.\"",
+          },
+          {
+            t: "tip",
+            text: "Apprends 5 mots par jour dans un contexte réel (une erreur rencontrée en TP), pas dans une liste. En trois mois, tu lis la doc sans dictionnaire.",
+          },
+        ],
+      },
+      {
+        id: "eng-email",
+        title: "Écrire un e-mail professionnel en anglais",
+        minutes: 10,
+        blocks: [
+          {
+            t: "p",
+            text: "L'e-mail professionnel anglais suit des codes précis : objet court et explicite, formule d'appel adaptée, une idée par paragraphe, demande claire et formule de politesse. Les fautes classiques : traduire « Cordialement » mot à mot ou tutoyer tout le monde.",
+          },
+          {
+            t: "list",
+            items: [
+              "Objet : « Request: server access for the accounting team » — action + sujet.",
+              "Appel : Dear Mr. Smith (formel), Hi John (collègue), To whom it may concern (inconnu).",
+              "Demander : « Could you please… », « I would like to request… », « May I ask for… ».",
+              "Annoncer un délai : « The maintenance is scheduled for Friday 10 pm. »",
+              "Clôture : Best regards / Kind regards (standard), Sincerely (très formel).",
+            ],
+          },
+          {
+            t: "code",
+            lang: "modèle",
+            code: "Subject: Scheduled maintenance — Friday, October 18th\n\nDear Ms. Carter,\n\nPlease be informed that a maintenance window is scheduled\non Friday, October 18th from 10:00 pm to midnight. During\nthis period, access to the file server may be interrupted.\n\nCould you please inform your team and confirm that this\ntime slot is suitable?\n\nBest regards,\nKarim Benali — IT Support",
+          },
+          {
+            t: "tip",
+            text: "Garde 3 modèles types (annonce de maintenance, demande d'information, compte rendu d'incident) et adapte-les : le jour de l'épreuve, tu écriras vite et sans stress.",
+          },
+        ],
+      },
+      {
+        id: "eng-job",
+        title: "Entretien d'embauche en anglais",
+        minutes: 12,
+        blocks: [
+          {
+            t: "p",
+            text: "Les recruteurs tech posent souvent quelques questions en anglais pour tester ta capacité à évoluer dans un environnement international. La clé : des réponses structurées et concrètes, pas des phrases parfaites.",
+          },
+          {
+            t: "list",
+            items: [
+              "« Tell me about yourself » : parcours + compétences + objectif, en 1 minute.",
+              "« Why this job? » : relie tes projets (TP, stage) au poste visé.",
+              "Méthode STAR pour les questions comportementales : Situation, Task, Action, Result.",
+              "Vocabulaire : internship (stage), apprenticeship (alternance), skills, background, challenge, achievement.",
+              "Questions à poser : « What does a typical day look like? », « How is the team organized? »",
+            ],
+          },
+          {
+            t: "code",
+            lang: "réponse STAR",
+            code: "Situation : \"During my internship, users could not print from the new VLAN.\"\nTask      : \"I had to identify why DHCP leases were not delivered.\"\nAction    : \"I checked the trunk configuration and found the missing VLAN tag.\"\nResult    : \"Printing was restored in 30 minutes and I documented the fix.\"",
+          },
+          {
+            t: "tip",
+            text: "Prépare 3 histoires STAR issues de tes TP (panne résolue, projet déployé, utilisateur formé) et réutilise-les : elles couvrent 90 % des questions comportementales.",
+          },
+        ],
+      },
+      {
+        id: "eng-meet",
+        title: "Réunions et présentations techniques",
+        minutes: 11,
+        blocks: [
+          {
+            t: "p",
+            text: "Présenter un projet technique en anglais (ou animer une réunion) demande des phrases de structuration simples. L'auditoire suit un plan annoncé, des transitions marquées et une conclusion qui résume.",
+          },
+          {
+            t: "list",
+            items: [
+              "Ouvrir : « The purpose of this meeting is to… », « Today I'll present… »",
+              "Structurer : « First… Then… Finally… », « Let's move on to… », « This leads me to my next point. »",
+              "Expliquer un schéma : « As you can see on this diagram… », « The firewall sits between… »",
+              "Gérer les questions : « That's a good question », « I'll come back to that later », « To sum up… »",
+            ],
+          },
+          {
+            t: "code",
+            lang: "squelette de démo",
+            code: "1. \"I'm going to show you our virtualized infrastructure.\"\n2. \"First, the network topology: we have three VLANs…\"\n3. \"Then, the Active Directory design with two OUs…\"\n4. \"Finally, the backup policy following the 3-2-1 rule.\"\n5. \"To sum up, this setup improved availability by 20%.\"",
+          },
+          {
+            t: "tip",
+            text: "Répète ta présentation à voix haute avec un chrono : une démo technique tient en 5 minutes, questions comprises. Mieux vaut court et clair que long et approximatif.",
+          },
+        ],
+      },
+    ],
+  },
+  /* ============================== FRANÇAIS ============================== */
+  {
+    id: "fra",
+    code: "FRA-01",
+    title: "Communication & français",
+    tagline: "Écrits professionnels, CV, synthèse de documents et oraux E4/E6.",
+    icon: "pen",
+    color: "#A3D9A5",
+    chapters: [
+      {
+        id: "fra-ecrits",
+        title: "Écrits professionnels : mail, note, compte rendu",
+        minutes: 10,
+        blocks: [
+          {
+            t: "p",
+            text: "En entreprise, chaque écrit engage son auteur et son service. Un bon écrit professionnel est utile (il fait avancer), bref (il va à l'essentiel) et irréprochable (orthographe, ton). Trois formats reviennent sans cesse : le mail, la note interne et le compte rendu.",
+          },
+          {
+            t: "list",
+            items: [
+              "Mail : objet explicite, une demande par mail, formule de politesse adaptée au destinataire.",
+              "Note interne : émetteur, destinataire, objet, date ; un problème + une solution, pas de récit.",
+              "Compte rendu : neutre et factuel — décisions prises, actions, responsables, échéances.",
+              "Règle des 5 W : qui, quoi, quand, où, pourquoi (et comment).",
+              "À éviter : jargon non expliqué, abréviations internes, ironie, majuscules (= crier).",
+            ],
+          },
+          {
+            t: "code",
+            lang: "note interne",
+            code: "NOTE INTERNE\nDe : Service informatique        Date : 12/03\nÀ  : Ensemble du personnel\nObjet : Coupure réseau du 15/03\n\nUne maintenance du cœur de réseau aura lieu le samedi\n15/03 de 8h à 10h. L'accès aux serveurs sera interrompu.\nPensez à enregistrer vos travaux la veille.\n\nContact : poste 4521 en cas d'urgence.",
+          },
+          {
+            t: "tip",
+            text: "Relis à voix haute avant d'envoyer : les phrases bancales s'entendent. Un écrit relit deux fois paraît toujours plus professionnel qu'un premier jet brillant.",
+          },
+        ],
+      },
+      {
+        id: "fra-cv",
+        title: "CV et lettre de motivation",
+        minutes: 11,
+        blocks: [
+          {
+            t: "p",
+            text: "Pour un stage ou une alternance en SISR, le CV tient sur une page et met en avant les compétences techniques réelles : tes TP et maquettes sont tes preuves. La lettre, elle, suit la structure « Vous — Moi — Nous ».",
+          },
+          {
+            t: "list",
+            items: [
+              "CV : état civil + contact, formation, compétences techniques (OS, réseaux, outils), projets/TP, expériences, centres d'intérêt.",
+              "Chiffre tes compétences : « Active Directory : gestion de 120 comptes en TP encadré ».",
+              "Lettre : VOUS (l'entreprise, pourquoi elle), MOI (ce que je sais faire), NOUS (ce qu'on fera ensemble).",
+              "Une page, PDF, nom de fichier propre : prenom-nom-cv.pdf.",
+              "Aucune faute : fais relire, puis relis encore.",
+            ],
+          },
+          {
+            t: "code",
+            lang: "extrait de lettre",
+            code: "« Votre ESN accompagne les PME de la région dans la\nsécurisation de leurs infrastructures, un enjeu que j'ai\napproché en construisant une maquette pfSense au lycée.\n\nJe souhaite mettre à profit ma rigueur de documentation\net mon goût pour le dépannage au sein de votre équipe\nsupport, et apprendre à vos côtés les méthodes d'un\ninfogérant professionnel. »",
+          },
+          {
+            t: "tip",
+            text: "Ton profil GitHub ou un dossier de maquettes (captures, schémas) vaut tous les adjectifs du monde : mets le lien sur le CV. Les recruteurs tech cliquent toujours.",
+          },
+        ],
+      },
+      {
+        id: "fra-synthese",
+        title: "La synthèse de documents (E1)",
+        minutes: 13,
+        blocks: [
+          {
+            t: "p",
+            text: "L'épreuve de culture générale (E1) demande une synthèse objective et structurée de plusieurs documents autour d'un thème, suivie d'une écriture personnelle. L'erreur classique : résumer les textes un par un au lieu de croiser leurs idées.",
+          },
+          {
+            t: "list",
+            items: [
+              "Étape 1 — lecture active : surligner idées clés, repérer thèses, exemples, registres.",
+              "Étape 2 — tableau de confrontation : une ligne par idée, une colonne par document.",
+              "Étape 3 — plan thématique (2-3 parties) organisé autour des idées communes et opposées.",
+              "Étape 4 — rédaction objective : pas de « je », citations courtes entre guillemets, connecteurs logiques.",
+              "Respecter la longueur demandée (généralement ± 10 %).",
+            ],
+          },
+          {
+            t: "p",
+            text: "Exemple de plan sur « le télétravail » : I. Les promesses (flexibilité, écologie) — II. Les limites (isolement, surconnexion) — III. Les conditions de réussite (management, droit à la déconnexion). Chaque partie croise les documents.",
+          },
+          {
+            t: "tip",
+            text: "Chronomètre-toi : 2 h pour la synthèse. Donne 45 min au tableau de confrontation — c'est lui qui fait la qualité du plan, donc de la note.",
+          },
+        ],
+      },
+      {
+        id: "fra-oral",
+        title: "Réussir sa présentation orale (E4/E6)",
+        minutes: 12,
+        blocks: [
+          {
+            t: "p",
+            text: "Aux oraux E4 et E6, le jury n'évalue pas seulement la technique : il évalue un futur professionnel qui sait rendre compte. Une présentation structurée, un débit posé et un support lisible font la différence entre 12 et 16.",
+          },
+          {
+            t: "list",
+            items: [
+              "Structure gagnante : contexte → besoin → solution mise en œuvre → tests et validation → bilan chiffré.",
+              "Support : un schéma réseau propre vaut trois slides de texte ; légende et couleurs signifiantes.",
+              "Posture : debout, regarde le jury, mains ouvertes, pas de lecture de notes.",
+              "Gestion du temps : répète avec chrono ; garde 2 minutes de marge pour les questions.",
+              "Questions : reformule avant de répondre (« Si je comprends bien… »), avoue honnêtement ce que tu ne sais pas.",
+            ],
+          },
+          {
+            t: "p",
+            text: "Anticipe les questions types : « Pourquoi ce choix plutôt qu'un autre ? », « Qu'auriez-vous fait différemment ? », « Quel coût / quel gain ? ». Prépare une réponse chiffrée pour chacune.",
+          },
+          {
+            t: "tip",
+            text: "Filme-toi une fois avec ton téléphone : dix minutes gênantes qui corrigent les tics de langage (« du coup », « en fait ») mieux que n'importe quel conseil.",
+          },
+        ],
+      },
+    ],
+  },
 ];
 
 export const ALL_CHAPTERS = MODULES.flatMap((m) =>
@@ -635,6 +1178,23 @@ export const CHAPTER_YEAR: Record<string, 1 | 2> = {
   "sec-base": 1,
   "sec-fw": 2,
   "sec-backup": 2,
+  "mth-bases": 1,
+  "mth-logique": 1,
+  "mth-suites": 1,
+  "mth-fonctions": 2,
+  "mth-probas": 2,
+  "cej-entreprise": 1,
+  "cej-contrats": 1,
+  "cej-rgpd": 2,
+  "cej-cyber": 2,
+  "eng-it": 1,
+  "eng-email": 1,
+  "eng-job": 2,
+  "eng-meet": 2,
+  "fra-ecrits": 1,
+  "fra-cv": 1,
+  "fra-synthese": 2,
+  "fra-oral": 2,
 };
 
 export const yearOf = (chapterId: string): 1 | 2 => CHAPTER_YEAR[chapterId] ?? 1;

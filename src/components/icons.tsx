@@ -165,3 +165,40 @@ export const IconChip = ({ className }: P) => (
     <path d="M10 2.5V7M14 2.5V7M10 17v4.5M14 17v4.5M2.5 10H7M2.5 14H7M17 10h4.5M17 14h4.5" strokeWidth="1.4" />
   </svg>
 );
+
+export const IconWand = ({ className }: P) => (
+  <svg {...base(className)}>
+    <path d="M4 20L15.5 8.5M13 6l1.5-1.5L19 9 17.5 10.5" />
+    <path d="M19 3v3M17.5 4.5h3M6 4.5v2.4M4.8 5.7h2.4M20.5 13.5v2.4M19.3 14.7h2.4" strokeWidth="1.3" />
+  </svg>
+);
+
+export const IconCalc = ({ className }: P) => (
+  <svg {...base(className)}>
+    <path d="M4 4v16h16" />
+    <path d="M6.5 15.5c2-7 4-8.5 5.5-8.5s2.5 3.5 4 3.5 2.5-2 3.5-4.5" />
+    <circle cx="12" cy="10.5" r="0.9" fill="currentColor" stroke="none" />
+    <path d="M4 9.5h2M4 13h2" strokeWidth="1.2" />
+  </svg>
+);
+
+export const IconScale = ({ className }: P) => (
+  <svg {...base(className)}>
+    <path d="M12 4v16M8 20h8M12 4l-5.5 2M12 4l5.5 2" />
+    <path d="M6.5 6L4 12a2.8 2.8 0 005 0L6.5 6zM17.5 6L15 12a2.8 2.8 0 005 0l-2.5-6z" />
+  </svg>
+);
+
+export const IconGlobe = ({ className }: P) => (
+  <svg {...base(className)}>
+    <circle cx="12" cy="12" r="8.5" />
+    <path d="M3.5 12h17M12 3.5c2.6 2.3 3.9 5.1 3.9 8.5S14.6 18.2 12 20.5c-2.6-2.3-3.9-5.1-3.9-8.5S9.4 5.8 12 3.5z" />
+  </svg>
+);
+
+export const IconPen = ({ className }: P) => (
+  <svg {...base(className)}>
+    <path d="M13.5 5.5l5 5L8 21l-5.5.5L3 16 13.5 5.5z" />
+    <path d="M16 3l5 5-2 2-5-5 2-2zM6.5 14.5l3 3" />
+  </svg>
+);

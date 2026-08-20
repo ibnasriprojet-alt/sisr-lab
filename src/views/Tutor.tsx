@@ -1,10 +1,11 @@
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { askTutor, SUGGESTIONS, TutorReply } from "../data/knowledge";
 import { findChapter } from "../data/courses";
+import { AIConfig, buildSystemPrompt, ChatMsg, getAIConfig, streamChat } from "../lib/ai";
 import { Year } from "../lib/backend";
 import { usePrefersReducedMotion } from "../lib/store";
 import { Reveal, Scramble } from "../components/fx";
-import { IconArrow, IconBook, IconSend, IconSpark } from "../components/icons";
+import { IconArrow, IconBook, IconSend, IconSpark, IconWand } from "../components/icons";
 import { Nav } from "./Dashboard";
 
 type Msg = {
@@ -23,18 +24,38 @@ function Avatar() {
   );
 }
 
-export default function Tutor({ nav, onAsk, year }: { nav: Nav; onAsk: () => void; year: Year }) {
+export default function Tutor({
+  nav,
+  onAsk,
+  year,
+  aiVersion,
+  onOpenSettings,
+}: {
+  nav: Nav;
+  onAsk: () => void;
+  year: Year;
+  aiVersion: number;
+  onOpenSettings: () => void;
+}) {
   const reduced = usePrefersReducedMotion();
+  const cfg: AIConfig | null = useMemo(() => getAIConfig(), [aiVersion]);
+  const aiMode = cfg !== null;
+
   const [messages, setMessages] = useState<Msg[]>([
     {
       role: "ai",
-      text: `NEXO en ligne. ⚡ Profil ${year === 1 ? "1re année" : "2e année"} détecté — j'adapte mes réponses à ton programme. Réseaux, Windows Server, Linux, virtualisation, cybersécurité : pose ta question ou choisis un sujet ci-dessous.`,
+      text: `NEXO en ligne. ⚡ Profil ${year === 1 ? "1re année" : "2e année"} détecté. ${
+        aiMode
+          ? `Mode IA réelle actif (${cfg!.model}) : je peux répondre à TOUT et rédiger des explications complètes.`
+          : "Mode connaissances embarquées : pose une question sur les 30+ sujets du référentiel."
+      } Choisis un sujet ci-dessous ou écris ta question.`,
     },
   ]);
   const [input, setInput] = useState("");
   const [thinking, setThinking] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const typeTimer = useRef<number>(0);
+  const historyRef = useRef<ChatMsg[]>([{ role: "system", content: buildSystemPrompt(year) }]);
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -43,12 +64,33 @@ export default function Tutor({ nav, onAsk, year }: { nav: Nav; onAsk: () => voi
 
   useEffect(() => () => clearTimeout(typeTimer.current), []);
 
-  const ask = (question: string) => {
+  const finishEmbedded = (reply: TutorReply) => {
+    setThinking(false);
+    if (reduced) {
+      setMessages((m) => [...m, { role: "ai", text: reply.answer, related: reply.related }]);
+      return;
+    }
+    setMessages((m) => [...m, { role: "ai", text: "", full: reply.answer, related: reply.related }]);
+    let i = 0;
+    const step = () => {
+      i += 3;
+      const done = i >= reply.answer.length;
+      setMessages((m) => {
+        const copy = [...m];
+        const last = copy[copy.length - 1];
+        copy[copy.length - 1] = { ...last, text: reply.answer.slice(0, i) };
+        return copy;
+      });
+      if (!done) typeTimer.current = window.setTimeout(step, 14);
+    };
+    typeTimer.current = window.setTimeout(step, 60);
+  };
+
+  const ask = async (question: string) => {
     const q = question.trim();
     if (!q || thinking) return;
     setInput("");
     onAsk();
-    // termine proprement une réponse encore en cours de frappe
     clearTimeout(typeTimer.current);
     setMessages((m) =>
       m.map((msg) =>
@@ -58,28 +100,42 @@ export default function Tutor({ nav, onAsk, year }: { nav: Nav; onAsk: () => voi
     setMessages((m) => [...m, { role: "user", text: q }]);
     setThinking(true);
 
-    const reply = askTutor(q, year);
-    typeTimer.current = window.setTimeout(() => {
+    /* ---- mode IA réelle : streaming depuis le fournisseur ---- */
+    if (cfg) {
+      historyRef.current = [...historyRef.current.slice(-8), { role: "user", content: q }];
+      setMessages((m) => [...m, { role: "ai", text: "" }]);
       setThinking(false);
-      if (reduced) {
-        setMessages((m) => [...m, { role: "ai", text: reply.answer, related: reply.related }]);
-        return;
-      }
-      setMessages((m) => [...m, { role: "ai", text: "", full: reply.answer, related: reply.related }]);
-      let i = 0;
-      const step = () => {
-        i += 3;
-        const done = i >= reply.answer.length;
+      let full = "";
+      try {
+        full = await streamChat(
+          cfg,
+          historyRef.current,
+          (_d, f) => {
+            full = f;
+            setMessages((m) => {
+              const copy = [...m];
+              copy[copy.length - 1] = { ...copy[copy.length - 1], text: f, full: f };
+              return copy;
+            });
+          },
+          undefined,
+          { maxTokens: 900 }
+        );
+        historyRef.current.push({ role: "assistant", content: full });
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : "L'IA n'a pas répondu.";
         setMessages((m) => {
           const copy = [...m];
-          const last = copy[copy.length - 1];
-          copy[copy.length - 1] = { ...last, text: reply.answer.slice(0, i) };
+          copy[copy.length - 1] = { ...copy[copy.length - 1], text: `⚠️ ${msg}`, full: msg };
           return copy;
         });
-        if (!done) typeTimer.current = window.setTimeout(step, 14);
-      };
-      typeTimer.current = window.setTimeout(step, 60);
-    }, 550 + Math.random() * 500);
+      }
+      return;
+    }
+
+    /* ---- mode embarqué : base de connaissances locale ---- */
+    const reply = askTutor(q, year);
+    window.setTimeout(() => finishEmbedded(reply), 550 + Math.random() * 500);
   };
 
   const submit = (e: FormEvent) => {
@@ -100,10 +156,25 @@ export default function Tutor({ nav, onAsk, year }: { nav: Nav; onAsk: () => voi
               <Scramble text="NEXO — tuteur IA" />
             </h1>
             <p className="font-mono text-[11.5px] text-dim mt-1.5">
-              <span className="text-mint">●</span> en ligne · connaissances embarquées · profil{" "}
-              <span style={{ color: year === 1 ? "#56C8E8" : "#F2B84B" }}>{year === 1 ? "1re année" : "2e année"}</span>
+              <span className="text-mint">●</span> en ligne ·{" "}
+              {aiMode ? (
+                <>
+                  IA réelle · <span className="text-mint">{cfg!.model}</span>
+                </>
+              ) : (
+                <>connaissances embarquées · programme BTS SIO SISR</>
+              )}{" "}
+              · profil <span style={{ color: year === 1 ? "#56C8E8" : "#F2B84B" }}>{year === 1 ? "1re année" : "2e année"}</span>
             </p>
           </div>
+          {!aiMode && (
+            <button
+              onClick={onOpenSettings}
+              className="hidden sm:flex items-center gap-2 rounded-lg border border-mint/40 text-mint px-3.5 py-2 font-mono text-[11.5px] hover:bg-mint/[0.07] transition-colors"
+            >
+              <IconWand className="w-3.5 h-3.5" /> passer en IA réelle
+            </button>
+          )}
         </div>
       </Reveal>
 
@@ -124,6 +195,7 @@ export default function Tutor({ nav, onAsk, year }: { nav: Nav; onAsk: () => voi
                   <p className="text-[14.5px] leading-[1.75] whitespace-pre-line text-fog/95">
                     {m.text}
                     {m.full && m.text.length < m.full.length && <span className="caret" />}
+                    {aiMode && !m.full && !thinking && m.text === "" && <span className="caret" />}
                   </p>
                 </div>
                 {m.related && (!m.full || m.text.length >= m.full.length) && (
@@ -187,7 +259,11 @@ export default function Tutor({ nav, onAsk, year }: { nav: Nav; onAsk: () => voi
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ex. : explique le découpage en sous-réseaux, l'ordre des GPO…"
+            placeholder={
+              aiMode
+                ? "Pose n'importe quelle question — même hors programme…"
+                : "Ex. : explique le découpage en sous-réseaux, l'ordre des GPO…"
+            }
             className="flex-1 rounded-lg border border-line bg-panel/70 px-4 py-3.5 text-sm placeholder:text-dim focus:border-mint/50 focus:outline-none transition-colors"
           />
           <button
@@ -200,7 +276,9 @@ export default function Tutor({ nav, onAsk, year }: { nav: Nav; onAsk: () => voi
           </button>
         </div>
         <p className="font-mono text-[11px] text-dim mt-2.5">
-          NEXO répond depuis une base experte locale couvrant le référentiel SISR — fonctionne hors connexion.
+          {aiMode
+            ? "Réponses générées par le modèle configuré — relis les commandes avant de les exécuter en TP."
+            : "Mode éco : base experte locale couvrant le référentiel, fonctionne hors connexion. Active l'IA réelle pour des réponses illimitées."}
         </p>
       </form>
     </div>

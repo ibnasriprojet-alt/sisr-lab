@@ -14,6 +14,7 @@ import {
   IconFlame,
   IconTarget,
   IconTerminal,
+  IconWand,
 } from "../components/icons";
 
 export type Nav = (view: string, payload?: Record<string, string>) => void;
@@ -104,6 +105,8 @@ export default function Dashboard({
   const yearColor = year === 1 ? "#56C8E8" : "#F2B84B";
   const modules = useMemo(() => modulesForYear(year), [year]);
   const nCards = cardsForYear(year).length;
+  const visibleCardIds = useMemo(() => new Set(cardsForYear(year).map((c) => c.id)), [year]);
+  const nKnown = progress.known.filter((id) => visibleCardIds.has(id)).length;
 
   const quizAvg = useMemo(() => {
     const ids = new Set(modules.map((m) => m.id));
@@ -156,6 +159,13 @@ export default function Dashboard({
               <div className="text-[11px] text-dim font-mono">jours d'affilée</div>
             </div>
           </div>
+          <button
+            onClick={() => nav("ai")}
+            className="rounded-lg border border-cy/50 text-cy px-4 py-3 font-display font-bold text-sm items-center gap-2 hover:bg-cy/10 transition-colors hidden md:flex"
+          >
+            <IconWand className="w-4 h-4" />
+            Cours IA
+          </button>
           <button
             onClick={() => nav("tutor")}
             className="group rounded-lg px-5 py-3 bg-mint text-abyss font-display font-bold text-sm flex items-center gap-2 transition-transform duration-300 hover:-translate-y-0.5 hover:shadow-[0_10px_30px_-10px_rgba(62,207,142,0.55)]"
@@ -280,7 +290,7 @@ export default function Dashboard({
               <IconCards className="w-4 h-4 text-vio" /> Cartes maîtrisées
             </div>
             <div className="font-display text-3xl font-bold mt-2">
-              <CountUp value={progress.known.length} />
+              <CountUp value={nKnown} />
               <span className="text-lg text-dim font-body font-normal">/{nCards}</span>
             </div>
             <div className="text-[12px] text-mist mt-1">
