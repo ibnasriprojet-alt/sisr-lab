@@ -165,18 +165,20 @@ export default function AISettingsModal({
               />
             </div>
             <div>
-              <label className="font-mono text-[11px] text-dim uppercase tracking-widest">Modèle</label>
-              <select
+              <label className="font-mono text-[11px] text-dim uppercase tracking-widest">
+                Modèle <span className="normal-case tracking-normal">(éditable — tape un autre nom si besoin)</span>
+              </label>
+              <input
+                list="ai-model-suggestions"
                 value={model}
                 onChange={(e) => setModel(e.target.value)}
                 className="w-full mt-1.5 rounded-lg border border-line bg-deep/70 px-3.5 py-2.5 font-mono text-[12px] focus:border-mint/50 focus:outline-none transition-colors"
-              >
+              />
+              <datalist id="ai-model-suggestions">
                 {PROVIDERS[provider].models.map((m) => (
-                  <option key={m} value={m} className="bg-deep">
-                    {m}
-                  </option>
+                  <option key={m} value={m} />
                 ))}
-              </select>
+              </datalist>
             </div>
           </div>
         </div>

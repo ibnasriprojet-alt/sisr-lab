@@ -24,9 +24,10 @@ export const PROVIDERS: Record<
   groq: {
     label: "Groq (recommandé, gratuit)",
     baseUrl: "https://api.groq.com/openai/v1",
-    models: ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"],
+    // Noms en vigueur chez Groq depuis août 2026 (les anciens llama-* sont retirés).
+    models: ["openai/gpt-oss-120b", "qwen/qwen3.6-27b", "openai/gpt-oss-20b"],
     keyUrl: "https://console.groq.com/keys",
-    note: "Crée une clé gratuite sur console.groq.com/keys — rapide et sans carte bancaire.",
+    note: "Crée une clé gratuite sur console.groq.com/keys — rapide et sans carte bancaire. Les modèles sont saisissables librement si Groq renomme les siens.",
   },
   openai: {
     label: "OpenAI / compatible",
@@ -37,12 +38,25 @@ export const PROVIDERS: Record<
   },
 };
 
+const DEPRECATED_GROQ_MODELS = [
+  "llama-3.3-70b-versatile",
+  "llama-3.1-8b-instant",
+  "llama3-70b-8192",
+  "llama3-8b-8192",
+];
+
 export function getAIConfig(): AIConfig | null {
   try {
     const raw = localStorage.getItem(KEY);
     if (!raw) return null;
     const c = JSON.parse(raw) as AIConfig;
     if (!c.apiKey || !c.baseUrl || !c.model) return null;
+    // migration auto : anciens noms de modèles Groq retirés en août 2026
+    if (c.provider === "groq" && DEPRECATED_GROQ_MODELS.includes(c.model)) {
+      const migrated: AIConfig = { ...c, model: PROVIDERS.groq.models[0] };
+      saveAIConfig(migrated);
+      return migrated;
+    }
     return c;
   } catch {
     return null;
